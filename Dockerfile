@@ -40,7 +40,7 @@ WORKDIR /downstream
 COPY --from=builder /tmp/jo /usr/bin/jo
 COPY src/ /downstream
 
-RUN apk add -U --no-cache jq
+RUN apk add -U --no-cache curl jq
 
 VOLUME ["/config"]
 

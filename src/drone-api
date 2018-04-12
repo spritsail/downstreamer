@@ -3,8 +3,10 @@ set -e
 
 source ./util.sh
 
+loginfo "CURL_OPTS is '$CURL_OPTS'"
+
 # callAPI <method> <endpoint> <data>
-callAPI() { curl -X $1 -H "Authorization: Bearer $DRONE_TOKEN" --data "$3" "$DRONE_SERVER/api/$2"; }
+callAPI() { curl $CURL_OPTS -X $1 -H "Authorization: Bearer $DRONE_TOKEN" --data "$3" "$DRONE_SERVER/api/$2"; }
 
 
 [ -z "$DRONE_TOKEN" ]  && error "No DRONE_TOKEN specified"

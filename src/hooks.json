@@ -14,11 +14,11 @@
       },
       {
         "source": "payload",
-        "name": "status"
+        "name": "build_status"
       },
       {
         "source": "payload",
-        "name": "build_num"
+        "name": "build_number"
       },
       {
         "source": "payload",
@@ -30,11 +30,11 @@
       },
       {
         "source": "payload",
-        "name": "url"
+        "name": "build_link"
       },
       {
         "source": "payload",
-        "name": "commit_msg"
+        "name": "commit_message"
       },
       {
         "source": "payload",

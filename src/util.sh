@@ -25,9 +25,10 @@ RESET="$(color '0')"
 
 
 # Logging
-loginfo()  { log $CYAN INFO "$@"; }
-logwarn()  { log $ORANGE WARN "$@"; }
-logerror() { log $RED ERROR "$@"; }
+LOGFILE=/dev/stdout
+loginfo()  { log $CYAN INFO "$@" > $LOGFILE; }
+logwarn()  { log $ORANGE WARN "$@" > $LOGFILE; }
+logerror() { log $RED ERROR "$@" > $LOGFILE; }
 log() {
     local color="$1"
     local level="$2"
@@ -37,7 +38,7 @@ log() {
     if [ -t 1 ]; then
         echo "$(date -Isec) <$(color $YELLOW)$(basename "$0")$RESET> $(color $color)[$level]$RESET $message"
     else
-        echo "$(date -Isec) <$(basename "$0") [$level] $message"
+        echo "$(date -Isec) <$(basename "$0")> [$level] $message"
     fi
 }
 

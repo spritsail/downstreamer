@@ -3,6 +3,8 @@ set -e
 
 source ./util.sh
 
+loginfo "CURL_OPTS is '$CURL_OPTS'"
+
 TELEGRAM_API="https://api.telegram.org"
 
 # buildUrl <token> <method>
@@ -16,7 +18,7 @@ sendMessagePayload() {
 }
 
 # callAPI <token> <method> <data>
-callAPI() { curl -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")"; }
+callAPI() { curl $CURL_OPTS -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")"; }
 
 
 [ -z "$TELEGRAM_BOT_TOKEN" ] && error "No TELEGRAM_BOT_TOKEN specified"
