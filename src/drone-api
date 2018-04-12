@@ -1,0 +1,48 @@
+#!/bin/sh
+set -e
+
+source ./util.sh
+
+# callAPI <method> <endpoint> <data>
+callAPI() { curl -X $1 -H "Authorization: Bearer $DRONE_TOKEN" --data "$3" "$DRONE_SERVER/api/$2"; }
+
+
+[ -z "$DRONE_TOKEN" ]  && error "No DRONE_TOKEN specified"
+[ -z "$DRONE_SERVER" ] && error "No DRONE_SERVER specified"
+
+command="$(echo "$1" | tr A-Z a-z)"
+shift || true
+
+case $command in
+    getuser)
+        callAPI GET 'user';;
+    getfeed)
+        callAPI GET 'user/feed';;
+    getrepos)
+        callAPI GET "user/repos";;
+    getbuilds)
+        ensureArgs $# 1 "repo"
+        if [ -n "$2" ]; then
+            callAPI GET "repos/$1/builds" | jq -cM "[ .[] | select(.branch == \"$2\") ]"
+        else
+            callAPI GET "repos/$1/builds"
+        fi;;
+    getlatestbuild)
+        ensureArgs $# 1 "repo"
+        if [ -n "$2" ]; then
+            callAPI GET "repos/$1/builds" | jq -cM "[ .[] | select(.branch == \"$2\") ] | .[0]"
+        else
+            callAPI GET "repos/$1/builds" | jq -cM ".[0]"
+        fi;;
+    *)
+        >&2 echo -e "USAGE:\n\t$(basename "$0") <command> [args..]\n" \
+            "\nCOMMANDS:\n" \
+            "\tgetuser                              Get information abouth the currently authenticated user\n" \
+            "\tgetfeed                              Get the activity feed of the currently authenticated user\n" \
+            "\tgetrepos                             Get a list of enabled repos\n" \
+            "\tgetbuilds <repo> [branch]            Get a list of builds for a repo\n" \
+            "\tgetlatestbuild <repo> [branch]       Get the latest build for a repo\n" \
+            ""
+        exit 99;;
+esac
+

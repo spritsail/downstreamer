@@ -1,28 +1,7 @@
 #!/bin/sh
 set -e
 
-error() { >&2 echo -e "Error: $@"; exit 1; }
-upper() { echo $@ | tr a-z A-Z; }
-
-checkVars() { 
-    O=`getopt -- 'p:s:' "$@"` || exit 1
-    eval set -- "$O"
-    while true; do
-        case "$1" in
-        -p) prefix="$2"; shift 2;;
-        -s) suffix="$2"; shift 2;;
-        --) shift; break;;
-        *)  error "$1";;
-        esac
-    done
-
-    for var in $@; do
-        varname="$prefix$var$suffix"
-        [ -z "$(printenv "$varname")" ] &&
-            error "'$varname' value missing"
-    done
-    return 0
-}
+source ./util.sh
 
 # Ensure the required variables are present
 checkVars -p HOOK_ \

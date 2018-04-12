@@ -1,10 +1,9 @@
 #!/bin/sh
 set -e
 
-TELEGRAM_API="https://api.telegram.org"
+source ./util.sh
 
-# error <message>
-error() { >&2 echo -e "Error: $@"; exit 1; }
+TELEGRAM_API="https://api.telegram.org"
 
 # buildUrl <token> <method>
 buildUrl() { echo "${TELEGRAM_API}/bot${1}/${2}"; }
@@ -20,9 +19,7 @@ sendMessagePayload() {
 callAPI() { curl -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")"; }
 
 
-if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
-    error "No TOKEN specified"
-fi
+[ -z "$TELEGRAM_BOT_TOKEN" ] && error "No TELEGRAM_BOT_TOKEN specified"
 
 command="$(echo "$1" | tr A-Z a-z)"
 shift || true
