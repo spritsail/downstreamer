@@ -14,7 +14,8 @@ RUN apk add -U libc-dev gcc make \
  && wget -O- https://github.com/jpmens/jo/releases/download/v1.1/jo-1.1.tar.gz | \
     tar xz --strip-components=1 \
  && ./configure \
- && make all
+ && make all \
+ && make check
 
 # =============
 
