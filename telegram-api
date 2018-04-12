@@ -1,0 +1,40 @@
+#!/bin/sh
+set -e
+
+TELEGRAM_API="https://api.telegram.org"
+
+# error <message>
+error() { >&2 echo -e "Error: $@"; exit 1; }
+
+# buildUrl <token> <method>
+buildUrl() { echo "${TELEGRAM_API}/bot${1}/${2}"; }
+
+# buildMessage <message> <optional args>
+sendMessagePayload() {
+    [ -z "$1" ]       && error "No message argument specified"
+    [ -z "$TELEGRAM_CHAT_ID" ] && error "No TELEGRAM_CHAT_ID specified"
+    jo parse_mode=markdown "chat_id=$TELEGRAM_CHAT_ID" "text=$1" "$@"
+}
+
+# callAPI <token> <method> <data>
+callAPI() { curl -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")"; }
+
+
+if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+    error "No TOKEN specified"
+fi
+
+command="$(echo "$1" | tr A-Z a-z)"
+shift || true
+
+case $command in
+    msg|message|sendmessage)
+        payload="$(sendMessagePayload "$@")" || exit 1
+        callAPI "$TELEGRAM_BOT_TOKEN" "sendMessage" "$payload";;
+    get|getme)
+        callAPI "$TELEGRAM_BOT_TOKEN" "getMe";;
+    *)
+        >&2 echo -e "Usage: $(basename "$0") <command> [args..]\n\nCOMMANDS:\n\tmessage\t\tSends a message (arg) to \$CHAT_ID\n\tgetme\t\tGets the bot information\n"
+        exit 99;;
+esac
+

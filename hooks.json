@@ -1,0 +1,61 @@
+[
+  {
+    "id": "downstream",
+    "execute-command": "/downstream/hook.sh",
+    "command-working-directory": "/downstream",
+    "pass-environment-to-command": [
+      {
+        "source": "payload",
+        "name": "repo"
+      },
+      {
+        "source": "payload",
+        "name": "branch"
+      },
+      {
+        "source": "payload",
+        "name": "status"
+      },
+      {
+        "source": "payload",
+        "name": "build_num"
+      },
+      {
+        "source": "payload",
+        "name": "build_started"
+      },
+      {
+        "source": "payload",
+        "name": "build_finished"
+      },
+      {
+        "source": "payload",
+        "name": "url"
+      },
+      {
+        "source": "payload",
+        "name": "commit_msg"
+      },
+      {
+        "source": "payload",
+        "name": "commit_link"
+      },
+      {
+        "source": "payload",
+        "name": "commit"
+      }
+    ],
+    "trigger-rule-mismatch-http-response-code": 401,
+    "trigger-rule": {
+      "match": {
+        "type": "value",
+        "value": "{{ getenv "WEBHOOK_TOKEN" | js }}",
+        "parameter":
+        {
+          "source": "header",
+          "name": "Authorization"
+        }
+      }
+    }
+  }
+]

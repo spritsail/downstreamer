@@ -1,0 +1,48 @@
+#!/bin/sh
+set -e
+
+error() { >&2 echo -e "Error: $@"; exit 1; }
+upper() { echo $@ | tr a-z A-Z; }
+
+checkVars() { 
+    O=`getopt -- 'p:s:' "$@"` || exit 1
+    eval set -- "$O"
+    while true; do
+        case "$1" in
+        -p) prefix="$2"; shift 2;;
+        -s) suffix="$2"; shift 2;;
+        --) shift; break;;
+        *)  error "$1";;
+        esac
+    done
+
+    for var in $@; do
+        varname="$prefix$var$suffix"
+        [ -z "$(printenv "$varname")" ] &&
+            error "'$varname' value missing"
+    done
+    return 0
+}
+
+# Ensure the required variables are present
+checkVars -p HOOK_ \
+    repo \
+    branch \
+    status \
+    build_num \
+    build_started \
+    build_finished \
+    url \
+    commit \
+    commit_url \
+    commit_msg \
+        || exit $?
+
+# Construct the notification message
+secs="$(expr $HOOK_build_finished - $HOOK_build_started)"
+message="*$HOOK_repo [$HOOK_branch]* #$HOOK_build_num: *$(upper $HOOK_status)* in $(date -u -d @$secs '+%Mm %Ss')
+[$HOOK_url]($HOOK_url)
+[#${HOOK_commit:0:7}]($HOOK_commit_url): _${HOOK_commit_msg}_"
+
+# Send the message with the telegram api
+telegram-api sendMessage "$message" "disable_web_page_preview=true"
