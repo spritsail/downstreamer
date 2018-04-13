@@ -18,7 +18,7 @@ checkVars -p HOOK_ \
         || exit $?
 
 # Construct the notification message
-secs="$(expr $HOOK_build_finished - $HOOK_build_started)"
+secs="$(($HOOK_build_finished - $HOOK_build_started))"
 message="*$HOOK_repo [$HOOK_branch]* #$HOOK_build_number: *$(upper $HOOK_build_status)* in $(date -u -d @$secs '+%Mm %Ss')
 [$HOOK_build_link]($HOOK_build_link)
 [#${HOOK_commit:0:7}]($HOOK_commit_link): _${HOOK_commit_message}_"
