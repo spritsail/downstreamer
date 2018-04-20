@@ -3,14 +3,18 @@ set -e
 
 source ./util.sh
 
-loginfo "CURL_OPTS is '$CURL_OPTS'"
-
 # callAPI <method> <endpoint> <data>
-callAPI() { curl $CURL_OPTS -X $1 -H "Authorization: Bearer $DRONE_TOKEN" --data "$3" "$DRONE_SERVER/api/$2"; }
+callAPI() { 
+    method="$1"
+    endpoint="$2"
+    shift 2 || true
+    IFS=$'\n'
+    curl $CURL_OPTS -X "$method" -H "Authorization: Bearer $DRONE_TOKEN" $@ "$DRONE_SERVER/api/$endpoint"
+}
 
 
-[ -z "$DRONE_TOKEN" ]  && error "No DRONE_TOKEN specified"
-[ -z "$DRONE_SERVER" ] && error "No DRONE_SERVER specified"
+[ -z "$DRONE_TOKEN" ]  && logerror "No DRONE_TOKEN specified"
+[ -z "$DRONE_SERVER" ] && logerror "No DRONE_SERVER specified"
 
 command="$(echo "$1" | tr A-Z a-z)"
 shift || true
@@ -23,19 +27,29 @@ case $command in
     getrepos)
         callAPI GET "user/repos";;
     getbuilds)
-        ensureArgs $# 1 "repo"
+        ensureArgs "'$@'" repo
         if [ -n "$2" ]; then
-            callAPI GET "repos/$1/builds" | jq -cM "[ .[] | select(.branch == \"$2\") ]"
+            callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.branch == \"$2\") ]"
         else
             callAPI GET "repos/$1/builds"
         fi;;
     getlatestbuild)
-        ensureArgs $# 1 "repo"
+        ensureArgs "'$@'" repo
         if [ -n "$2" ]; then
-            callAPI GET "repos/$1/builds" | jq -cM "[ .[] | select(.branch == \"$2\") ] | .[0]"
+            callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.branch == \"$2\") ] | .[0]"
         else
-            callAPI GET "repos/$1/builds" | jq -cM ".[0]"
+            callAPI GET "repos/$1/builds" | jq -e -cM ".[0]"
         fi;;
+    getsuccessfulbuild)
+        ensureArgs "'$@'" repo
+        if [ -n "$2" ]; then
+            callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.branch == \"$2\") | select(.status == \"success\") ] | .[0]"
+        else
+            callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.status == \"success\") ] | .[0]"
+        fi;;
+    forkbuild)
+        ensureArgs "'$@'" repo fromid
+        callAPI POST "repos/$repo/builds/$fromid" -G "$(printf -- "--data-urlencode\n%s" "$@")";;
     *)
         >&2 echo -e "USAGE:\n\t$(basename "$0") <command> [args..]\n" \
             "\nCOMMANDS:\n" \
@@ -44,7 +58,9 @@ case $command in
             "\tgetrepos                             Get a list of enabled repos\n" \
             "\tgetbuilds <repo> [branch]            Get a list of builds for a repo\n" \
             "\tgetlatestbuild <repo> [branch]       Get the latest build for a repo\n" \
+            "\tgetsuccessfusbuild <repo> [branch]   Get the latest build that succeeded for a repo\n" \
+            "\tforkbuild <repo> <id-to-fork> [args] Fork a build for a repo\n" \
             ""
         exit 99;;
 esac
-
+ 

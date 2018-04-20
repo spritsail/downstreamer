@@ -25,28 +25,30 @@ RESET="$(color '0')"
 
 
 # Logging
-LOGFILE=/dev/stdout
-loginfo()  { log $CYAN INFO "$@" > $LOGFILE; }
-logwarn()  { log $ORANGE WARN "$@" > $LOGFILE; }
-logerror() { log $RED ERROR "$@" > $LOGFILE; }
+loginfo()  { log $CYAN INFO "$@"; }
+logwarn()  { log $ORANGE WARN "$@"; }
+logerror() { log $RED ERROR "$@"; telegram-api sendMessage "$(echo -e "*Downstreamer Error*\n$@")"; }
 log() {
     local color="$1"
     local level="$2"
-    shift 2
+    shift 2 || true
     local message="$@"
 
-    if [ -t 1 ]; then
-        echo "$(date -Isec) <$(color $YELLOW)$(basename "$0")$RESET> $(color $color)[$level]$RESET $message"
-    else
-        echo "$(date -Isec) <$(basename "$0")> [$level] $message"
-    fi
+    for f in "$LOGFILE" /dev/stderr; do
+        [ -z "$f" ] && continue
+        exec >>$f
+        if [ -t 1 ]; then
+            echo "$(date -Isec) <$(color $YELLOW)$(basename "$0")$RESET> $(color $color)[$level]$RESET $message"
+        else
+            echo "$(date -Isec) <$(basename "$0")> [$level] $message"
+        fi
+    done
 }
-
-
-error() { logerror "$@"; >&2 echo -e "Error: $(basename "$0"): $@"; exit 1; }
 
 upper() { echo $@ | tr a-z A-Z; }
 lower() { echo $@ | tr A-Z a-z; }
+
+curlencode() { echo '-G'; printf '%s\0' "$@" | xargs -0 -n1 -I{} echo '--data-urlencode {}'; }
 
 checkVars() {
     O=`getopt -- 'p:s:' "$@"` || exit 1
@@ -66,15 +68,4 @@ checkVars() {
             error "'$varname' value missing"
     done
     return 0
-}
-
-# ensureArgs $# <n> <name1> <..name2>
-ensureArgs() {
-    actual=$1
-    required=$2
-    shift 2
-
-    if [ $actual -lt $required ]; then
-        error "Missing required arguments: $@"
-    fi
 }

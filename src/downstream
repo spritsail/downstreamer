@@ -1,0 +1,31 @@
+#!/bin/sh
+set -e
+
+source ./util.sh
+
+if [ $# -lt 1 -o -z "$1" ]; then
+    logerror "Downstream repository argument missing or empty"
+fi
+
+DOWNSTREAM="$1"
+DS_REPO="$(echo $1 | cut -d: -f1)"
+DS_BRANCH="$(echo $1 | cut -sd: -f2)"
+
+latestbuild="$(drone-api getsuccessfulbuild $DS_REPO $DS_BRANCH)" || { logwarn "No latest build for $DOWNSTREAM to fork"; exit 5; }
+lateststatus="$(echo "$latestbuild" | jq -er .status)" || { logwarn "Failed to get status of build for $DOWNSTREAM"; exit 6; }
+latestid="$(echo "$latestbuild" | jq -er .number)" || { logwarn "Failed to get id of build for $DOWNSTREAM"; exit 7; }
+
+case $lateststatus in
+    pending|running)
+        # TODO: The latest build is running/pending. We should wait for it to finish
+        ;;
+    *)
+        # No worries. Go ahead and restart it
+        break;;
+esac
+
+[ -n "$HOOK_repo" ] && message="message=Downstream build triggered by $HOOK_repo"
+[ -n "$HOOK_build_number" ] && message="$message #$HOOK_build_number"
+
+drone-api forkbuild "$DS_REPO" "$latestid" "$message" \
+    || { logerror "Failed to fork build $DOWNSTREAM #$latestid"; exit 8; }

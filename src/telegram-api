@@ -3,8 +3,6 @@ set -e
 
 source ./util.sh
 
-loginfo "CURL_OPTS is '$CURL_OPTS'"
-
 TELEGRAM_API="https://api.telegram.org"
 
 # buildUrl <token> <method>
@@ -12,16 +10,16 @@ buildUrl() { echo "${TELEGRAM_API}/bot${1}/${2}"; }
 
 # buildMessage <message> <optional args>
 sendMessagePayload() {
-    [ -z "$1" ]       && error "No message argument specified"
-    [ -z "$TELEGRAM_CHAT_ID" ] && error "No TELEGRAM_CHAT_ID specified"
-    jo parse_mode=markdown "chat_id=$TELEGRAM_CHAT_ID" "text=$1" "$@"
+    [ -z "$1" ] && logwarn "No message argument specified"
+    [ -z "$TELEGRAM_CHAT_ID" ] && logwarn "No TELEGRAM_CHAT_ID specified"
+    text="$(echo "$1" | sed 's|\\|\\|g')"; shift || true
+    jo parse_mode=markdown "chat_id=$TELEGRAM_CHAT_ID" "text=$text" "$@"
 }
 
-# callAPI <token> <method> <data>
-callAPI() { curl $CURL_OPTS -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")"; }
+# callAPI <token> <method> <args>
+callAPI() { IFS=$'\n'; curl $CURL_OPTS -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")"; }
 
-
-[ -z "$TELEGRAM_BOT_TOKEN" ] && error "No TELEGRAM_BOT_TOKEN specified"
+[ -z "$TELEGRAM_BOT_TOKEN" ] && logwarn "No TELEGRAM_BOT_TOKEN specified"
 
 command="$(echo "$1" | tr A-Z a-z)"
 shift || true
@@ -29,9 +27,11 @@ shift || true
 case $command in
     msg|message|sendmessage)
         payload="$(sendMessagePayload "$@")" || exit 1
-        callAPI "$TELEGRAM_BOT_TOKEN" "sendMessage" "$payload";;
+        callAPI "$TELEGRAM_BOT_TOKEN" "sendMessage" "$payload" \
+            || logwarn "telegram sendMessage failed";;
     get|getme)
-        callAPI "$TELEGRAM_BOT_TOKEN" "getMe";;
+        callAPI "$TELEGRAM_BOT_TOKEN" "getMe" \
+            || logwarn "telegram getMe failed";;
     *)
         >&2 echo -e "Usage: $(basename "$0") <command> [args..]\n\nCOMMANDS:\n\tmessage\t\tSends a message (arg) to \$CHAT_ID\n\tgetme\t\tGets the bot information\n"
         exit 99;;
