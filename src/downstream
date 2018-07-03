@@ -18,6 +18,8 @@ latestid="$(echo "$latestbuild" | jq -er .number)" || { logwarn "Failed to get i
 case $lateststatus in
     pending|running)
         # TODO: The latest build is running/pending. We should wait for it to finish
+        loginfo "The latest build is $lateststatus. We should wait for it to finish"
+        exit 12
         ;;
     *)
         # No worries. Go ahead and restart it
