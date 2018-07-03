@@ -9,7 +9,7 @@ callAPI() {
     endpoint="$2"
     shift 2 || true
     IFS=$'\n'
-    curl $CURL_OPTS -X "$method" -H "Authorization: Bearer $DRONE_TOKEN" $@ "$DRONE_SERVER/api/$endpoint"
+    curl $CURL_OPTS -X "$method" -H "Authorization: Bearer $DRONE_TOKEN" $@ --url "$DRONE_SERVER/api/$endpoint"
 }
 
 
@@ -27,29 +27,25 @@ case $command in
     getrepos)
         callAPI GET "user/repos";;
     getbuilds)
-        ensureArgs "'$@'" repo
         if [ -n "$2" ]; then
             callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.branch == \"$2\") ]"
         else
             callAPI GET "repos/$1/builds"
         fi;;
     getlatestbuild)
-        ensureArgs "'$@'" repo
         if [ -n "$2" ]; then
             callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.branch == \"$2\") ] | .[0]"
         else
             callAPI GET "repos/$1/builds" | jq -e -cM ".[0]"
         fi;;
     getsuccessfulbuild)
-        ensureArgs "'$@'" repo
         if [ -n "$2" ]; then
             callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.branch == \"$2\") | select(.status == \"success\") ] | .[0]"
         else
             callAPI GET "repos/$1/builds" | jq -e -cM "[ .[] | select(.status == \"success\") ] | .[0]"
         fi;;
     forkbuild)
-        ensureArgs "'$@'" repo fromid
-        callAPI POST "repos/$repo/builds/$fromid" -G "$(printf -- "--data-urlencode\n%s" "$@")";;
+        callAPI POST "repos/$1/builds/$2" -G "$(printf -- "--data-urlencode\n%s\n" "$@")";;
     *)
         >&2 echo -e "USAGE:\n\t$(basename "$0") <command> [args..]\n" \
             "\nCOMMANDS:\n" \
