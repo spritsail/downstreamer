@@ -1,7 +1,7 @@
 ARG JO_VER=1.1
 ARG DOWNSTREAMER_VER=1.0
 
-FROM alpine:3.7 as builder
+FROM alpine:3.8 as builder
 
 ARG JO_VER
 
