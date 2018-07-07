@@ -6,11 +6,12 @@ pipeline:
 
   publish:
     image: spritsail/docker-publish
-    when: { branch: [ master ], event: [ push, tag, deployment ] }
+    when: { branch: [ dev ], event: [ push, tag, deployment ] }
     volumes: [ '/var/run/docker.sock:/var/run/docker.sock' ]
     secrets: [ docker_username, docker_password, microbadger_token ]
     from: downstreamer-dev
     repo: spritsail/downstreamer
+    tags: dev
 
   notify:
     image: spritsail/notify
