@@ -27,14 +27,17 @@ try_downstream() {
     while read ds; do
         ds_repo="$(echo $ds | cut -d' ' -f1)"
         should_trigger=true
-        # Check each additional data argument for a match
-        for var in $(echo $ds | cut -d' ' -f2-); do
-            if ! echo $DATA | jq -e '. | index("'${var/\"/\\\"}'")' >/dev/null; then
-                should_trigger=false
-                loginfo "Downstream not triggered because '$var' not valid for $ds_repo"
-                break
-            fi
-        done
+
+        # Check each at least the required arguments are provided using 'comm' to find common lines
+        required_data="$(mktemp)"
+        provided_data="$(mktemp)"
+        echo "$ds" | sed -e 's/^[^\ ]*\ *//' | tr ' ' '\n' > "$required_data"
+        echo "$DATA" | jq -r '.[]' > "$provided_data"
+        if [ "$(comm -23 "$required_data" "$provided_data" | wc -l)" -eq 0 ]; then
+            should_trigger=false
+        fi
+        rm -f "$required_data" "$provided_data"
+
         if [ "$should_trigger" == 'true' ]; then
             loginfo "Triggering downstream build for $ds_repo"
             downstream "$ds_repo"
