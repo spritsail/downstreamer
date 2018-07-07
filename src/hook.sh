@@ -17,25 +17,25 @@ export CURL_OPTS="$(echo ${CURL_OPTS} | sed 's/ /\n/g')"
 
 source ./util.sh
 
-checkVars -p HOOK_ repo branch build_number build_status
-loginfo "Incoming notification for $HOOK_repo:$HOOK_branch (#$HOOK_build_number) [$HOOK_build_status]"
+checkVars REPO BRANCH BUILD_NUMBER BUILD_STATUS
+loginfo "Incoming notification for $REPO:$BRANCH (#$BUILD_NUMBER) [$BUILD_STATUS]"
 
 # Send a notification
 notify-telegram || logwarn "Failed to send Telegram notification: $?"
 
 # Check for downstream files
-if [ -f "$CONFIG_DIR/$HOOK_repo:$HOOK_branch" ]; then
+if [ -f "$CONFIG_DIR/$REPO:$BRANCH" ]; then
     while read ds; do
         loginfo "Triggering downstream build for $ds"
         downstream "$ds"
-    done < "$CONFIG_DIR/$HOOK_repo:$HOOK_branch"
+    done < "$CONFIG_DIR/$REPO:$BRANCH"
 
-elif [ -f "$CONFIG_DIR/$HOOK_repo" ]; then
+elif [ -f "$CONFIG_DIR/$REPO" ]; then
     while read ds; do
         loginfo "Triggering downstream build for $ds"
         downstream "$ds"
-    done < "$CONFIG_DIR/$HOOK_repo"
+    done < "$CONFIG_DIR/$REPO"
 
 else
-    loginfo "No downstream entries for $HOOK_repo"
+    loginfo "No downstream entries for $REPO"
 fi

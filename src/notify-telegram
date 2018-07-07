@@ -4,24 +4,24 @@ set -e
 source ./util.sh
 
 # Ensure the required variables are present
-checkVars -p HOOK_ \
-    repo \
-    branch \
-    build_status \
-    build_number \
-    build_started \
-    build_finished \
-    build_link \
-    commit \
-    commit_link \
-    commit_message \
+checkVars \
+    REPO \
+    BRANCH \
+    BUILD_STATUS \
+    BUILD_NUMBER \
+    BUILD_STARTED \
+    BUILD_FINISHED \
+    BUILD_LINK \
+    COMMIT \
+    COMMIT_LINK \
+    COMMIT_MESSAGE \
         || exit $?
 
 # Construct the notification message
-secs="$(($HOOK_build_finished - $HOOK_build_started))"
-message="*${HOOK_repo/_/\\_} [$HOOK_branch]* #$HOOK_build_number: *$(upper $HOOK_build_status)* in $(date -u -d @$secs '+%Mm %Ss')
-[${HOOK_build_link/_/\\_}](${HOOK_build_link/_/\\_})
-[#${HOOK_commit:0:7}](${HOOK_commit_link/_/\\_}): _${HOOK_commit_message/_/\\_}_"
+secs="$(($BUILD_FINISHED - $BUILD_STARTED))"
+message="*${REPO/_/\\_} [$BRANCH]* #$BUILD_NUMBER: *$(upper $BUILD_STATUS)* in $(date -u -d @$secs '+%Mm %Ss')
+[${BUILD_LINK/_/\\_}](${BUILD_LINK/_/\\_})
+[#${COMMIT:0:7}](${COMMIT_LINK/_/\\_}): _${COMMIT_MESSAGE/_/\\_}_"
 
 # Send the message with the telegram api
 telegram-api sendMessage "$message" "disable_web_page_preview=true"

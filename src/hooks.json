@@ -6,43 +6,53 @@
     "pass-environment-to-command": [
       {
         "source": "payload",
-        "name": "repo"
+        "name": "repo",
+        "envname": "REPO"
       },
       {
         "source": "payload",
-        "name": "branch"
+        "name": "branch",
+        "envname": "BRANCH"
       },
       {
         "source": "payload",
-        "name": "build_status"
+        "name": "build_status",
+        "envname": "BUILD_STATUS"
       },
       {
         "source": "payload",
-        "name": "build_number"
+        "name": "build_number",
+        "envname": "BUILD_NUMBER"
       },
       {
         "source": "payload",
-        "name": "build_started"
+        "name": "build_started",
+        "envname": "BUILD_STARTED"
       },
       {
         "source": "payload",
-        "name": "build_finished"
+        "name": "build_finished",
+        "envname": "BUILD_FINISHED"
       },
       {
         "source": "payload",
-        "name": "build_link"
+        "name": "build_link",
+        "envname": "BUILD_LINK"
       },
       {
         "source": "payload",
-        "name": "commit_message"
+        "name": "commit_message",
+        "envname": "COMMIT_MESSAGE"
       },
       {
         "source": "payload",
-        "name": "commit_link"
+        "name": "commit_link",
+        "envname": "COMMIT_LINK"
       },
       {
         "source": "payload",
-        "name": "commit"
+        "name": "commit",
+        "envname": "COMMIT"
       }
     ],
     "trigger-rule-mismatch-http-response-code": 401,

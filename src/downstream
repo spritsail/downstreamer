@@ -26,8 +26,8 @@ case $lateststatus in
         break;;
 esac
 
-[ -n "$HOOK_repo" ] && message="message=Downstream build triggered by $HOOK_repo"
-[ -n "$HOOK_build_number" ] && message="$message #$HOOK_build_number"
+[ -n "$REPO" ] && message="message=Downstream build triggered by $REPO"
+[ -n "$BUILD_NUMBER" ] && message="$message #$BUILD_NUMBER"
 
 drone-api forkbuild "$DS_REPO" "$latestid" "$message" \
     || { logerror "Failed to fork build $DOWNSTREAM #$latestid"; exit 8; }
