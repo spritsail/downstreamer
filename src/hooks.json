@@ -53,6 +53,16 @@
         "source": "payload",
         "name": "commit",
         "envname": "COMMIT"
+      },
+      {
+          "source": "payload",
+          "name": "tag",
+          "envname": "TAG"
+      },
+      {
+          "source": "payload",
+          "name": "data",
+          "envname": "DATA"
       }
     ],
     "trigger-rule-mismatch-http-response-code": 401,

@@ -23,19 +23,32 @@ loginfo "Incoming notification for $REPO:$BRANCH (#$BUILD_NUMBER) [$BUILD_STATUS
 # Send a notification
 notify-telegram || logwarn "Failed to send Telegram notification: $?"
 
+try_downstream() {
+    while read ds; do
+        ds_repo="$(echo $ds | cut -d' ' -f1)"
+        should_trigger=true
+        # Check each additional data argument for a match
+        for var in $(echo $ds | cut -d' ' -f2-); do
+            if ! echo $DATA | jq -e '. | index("'${var/\"/\\\"}'")' >/dev/null; then
+                should_trigger=false
+                loginfo "Downstream not triggered because '$var' not valid for $ds_repo"
+                break
+            fi
+        done
+        if [ "$should_trigger" == 'true' ]; then
+            loginfo "Triggering downstream build for $ds_repo"
+            downstream "$ds_repo"
+        fi
+    done < "$1"
+}
+
 # Check for downstream files
-if [ -f "$CONFIG_DIR/$REPO:$BRANCH" ]; then
-    while read ds; do
-        loginfo "Triggering downstream build for $ds"
-        downstream "$ds"
-    done < "$CONFIG_DIR/$REPO:$BRANCH"
-
+if [ -n "$TAG" -a -f "$CONFIG_DIR/$REPO:$BRANCH:$TAG"  ]; then
+    try_downstream "$CONFIG_DIR/$REPO:$BRANCH:$TAG"
+elif [ -f "$CONFIG_DIR/$REPO:$BRANCH" ]; then
+    try_downstream "$CONFIG_DIR/$REPO:$BRANCH"
 elif [ -f "$CONFIG_DIR/$REPO" ]; then
-    while read ds; do
-        loginfo "Triggering downstream build for $ds"
-        downstream "$ds"
-    done < "$CONFIG_DIR/$REPO"
-
+    try_downstream "$CONFIG_DIR/$REPO"
 else
     loginfo "No downstream entries for $REPO"
 fi
