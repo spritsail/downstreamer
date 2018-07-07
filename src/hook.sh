@@ -35,6 +35,7 @@ try_downstream() {
         echo "$DATA" | jq -r '.[]' > "$provided_data"
         if [ "$(comm -23 "$required_data" "$provided_data" | wc -l)" -eq 0 ]; then
             should_trigger=false
+            loginfo "Downstream not triggered because '$var' not valid for $ds_repo"
         fi
         rm -f "$required_data" "$provided_data"
 
