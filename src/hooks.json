@@ -41,6 +41,11 @@
       },
       {
         "source": "payload",
+        "name": "commit_author",
+        "envname": "COMMIT_AUTHOR"
+      },
+      {
+        "source": "payload",
         "name": "commit_message",
         "envname": "COMMIT_MESSAGE"
       },
