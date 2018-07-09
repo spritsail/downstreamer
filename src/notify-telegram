@@ -20,7 +20,7 @@ checkVars \
 
 # Construct the notification message
 secs="$(($BUILD_FINISHED - $BUILD_STARTED))"
-message="*${REPO/_/\\_} [$BRANCH]* #$BUILD_NUMBER: *$(upper $BUILD_STATUS)* in $(date -u -d @$secs '+%Mm %Ss')
+message="*${REPO/_/\\_}$(test -n "$TAG" -a "$TAG" != "<nil>" && echo ":$TAG") [$BRANCH]* #$BUILD_NUMBER: *$(upper $BUILD_STATUS)* in $(date -u -d @$secs '+%Mm %Ss')
 [${BUILD_LINK/_/\\_}](${BUILD_LINK/_/\\_})
 [#${COMMIT:0:7}](${COMMIT_LINK/_/\\_}) (${COMMIT_AUTHOR}): _${COMMIT_MESSAGE/_/\\_}_"
 
