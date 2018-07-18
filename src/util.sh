@@ -58,14 +58,17 @@ checkVars() {
         -p) prefix="$2"; shift 2;;
         -s) suffix="$2"; shift 2;;
         --) shift; break;;
-        *)  error "$1";;
+        *)  logerror "$1";;
         esac
     done
 
+    retval=0
     for var in $@; do
         varname="$prefix$var$suffix"
-        [ -z "$(printenv "$varname")" ] &&
-            error "'$varname' value missing"
+        if [ -z "$(printenv "$varname")" ]; then
+            logerror "'$varname' value missing"
+            retval=1
+        fi
     done
-    return 0
+    return $retval
 }

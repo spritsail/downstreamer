@@ -17,7 +17,10 @@ sendMessagePayload() {
 }
 
 # callAPI <token> <method> <args>
-callAPI() { IFS=$'\n'; curl $CURL_OPTS -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")"; }
+callAPI() {
+    output="$(IFS=$'\n'; curl $CURL_OPTS -X POST -H "Content-Type: application/json" --data "$3" "$(buildUrl "$1" "$2")")"
+    [ -n "$output" ] && loginfo "$output"
+}
 
 [ -z "$TELEGRAM_BOT_TOKEN" ] && logwarn "No TELEGRAM_BOT_TOKEN specified"
 
