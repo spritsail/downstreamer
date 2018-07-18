@@ -27,7 +27,7 @@ RESET="$(color '0')"
 # Logging
 loginfo()  { log $CYAN INFO "$@"; }
 logwarn()  { log $ORANGE WARN "$@"; }
-logerror() { log $RED ERROR "$@"; telegram-api sendMessage "$(echo -e "*Downstreamer Error*\n$@")"; }
+logerror() { log $RED ERROR "$@"; telegram-api sendMessage "$(echo -e "<b>Downstreamer Error</b>\n$@")"; }
 log() {
     local color="$1"
     local level="$2"
@@ -47,6 +47,8 @@ log() {
 
 upper() { echo $@ | tr a-z A-Z; }
 lower() { echo $@ | tr A-Z a-z; }
+
+esc() { echo "$@" | recode ascii..html; }
 
 curlencode() { echo '-G'; printf '%s\0' "$@" | xargs -0 -n1 -I{} echo '--data-urlencode {}'; }
 

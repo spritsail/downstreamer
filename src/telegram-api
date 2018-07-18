@@ -12,8 +12,8 @@ buildUrl() { echo "${TELEGRAM_API}/bot${1}/${2}"; }
 sendMessagePayload() {
     [ -z "$1" ] && logwarn "No message argument specified"
     [ -z "$TELEGRAM_CHAT_ID" ] && logwarn "No TELEGRAM_CHAT_ID specified"
-    text="$(echo "$1" | sed 's|\\|\\|g')"; shift || true
-    jo parse_mode=markdown "chat_id=$TELEGRAM_CHAT_ID" "text=$text" "$@"
+    text="$1"; shift || true
+    jo parse_mode=HTML "chat_id=$TELEGRAM_CHAT_ID" "text=$text" "$@"
 }
 
 # callAPI <token> <method> <args>

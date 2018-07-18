@@ -20,9 +20,13 @@ checkVars \
 
 # Construct the notification message
 secs="$(($BUILD_FINISHED - $BUILD_STARTED))"
-message="*${REPO/_/\\_}$(test -n "$TAG" -a "$TAG" != "<nil>" && echo ":$TAG") [$BRANCH]* #$BUILD_NUMBER: *$(upper $BUILD_STATUS)* in $(date -u -d @$secs '+%Mm %Ss')
-[${BUILD_LINK/_/\\_}](${BUILD_LINK/_/\\_})
-[#${COMMIT:0:7}](${COMMIT_LINK/_/\\_}) (${COMMIT_AUTHOR}): _${COMMIT_MESSAGE/_/\\_}_"
+datefmt=$(test $secs -ge 3600 && echo '+%Hh %Mm %Ss' || echo '+%Mm %Ss')
+date="$(date -u -d "@$secs" "$datefmt")"
+tag="$(test -n "$TAG" -a "$TAG" != "<nil>" && echo ":$TAG" || true)"
+
+message="<b>${REPO/_/\\_}${tag} [$BRANCH]</b> #$BUILD_NUMBER: <b>$(upper $BUILD_STATUS)</b> in ${date}
+<a href=\"$(esc ${BUILD_LINK})\">$(esc ${BUILD_LINK})</a>
+<a href=\"$(esc ${COMMIT_LINK})\">#${COMMIT:0:7}</a> (${COMMIT_AUTHOR}): <i>$(esc ${COMMIT_MESSAGE})</i>"
 
 # Send the message with the telegram api
 telegram-api sendMessage "$message" "disable_web_page_preview=true"
