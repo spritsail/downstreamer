@@ -8,7 +8,7 @@ set -e
 CONFIG_DIR="${CONFIG_DIR:-/config}"
 LOG_DIR="${LOG_DIR:-/logs}"
 LOGFILE="${LOGFILE:-"$LOG_DIR/$(basename "$0")-$(date -Idate)"}"
-CURL_OPTS=${CURL_OPTS--fsSL}
+CURL_OPTS=${CURL_OPTS--fsSL --retry-connrefused --retry 5 --retry-delay 5 --connect-timeout 5 --max-time 10}
 
 #############################
 
