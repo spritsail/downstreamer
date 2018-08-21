@@ -47,9 +47,9 @@ try_downstream() {
 }
 
 # Check for downstream files
-if ! echo "$BUILD_STATUS" | grep -qiw 'success'; then
+if [ "$BUILD_STATUS" != 'success' ]; then
     loginfo "Build failed. Not triggering any downstream builds"
-elif [ -n "$TAG" -a -f "$CONFIG_DIR/$REPO:$BRANCH:$TAG"  ]; then
+elif [ -n "$TAG" -a -f "$CONFIG_DIR/$REPO:$BRANCH:$TAG" ]; then
     try_downstream "$CONFIG_DIR/$REPO:$BRANCH:$TAG"
 elif [ -f "$CONFIG_DIR/$REPO:$BRANCH" ]; then
     try_downstream "$CONFIG_DIR/$REPO:$BRANCH"
