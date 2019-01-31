@@ -17,13 +17,17 @@ export CURL_OPTS="$(echo ${CURL_OPTS} | sed 's/ /\n/g')"
 
 source ./util.sh
 
-checkVars REPO BRANCH BUILD_NUMBER BUILD_STATUS
+checkVars REPO BRANCH BUILD_NUMBER BUILD_STATUS COMMIT_MESSAGE
 loginfo "Incoming notification for $REPO:$BRANCH (#$BUILD_NUMBER) [$BUILD_STATUS]"
 
 # Send a notification
 notify-telegram || logwarn "Failed to send Telegram notification: $?"
 
 try_downstream() {
+    if echo "$COMMIT_MESSAGE" | grep -qiwe '\[DOWNSTREAM SKIP\]' -e '\[SKIP DOWNSTREAM\]'; then
+        loginfo "Downstream not triggered because it was skipped"
+        return
+    fi
     while read ds; do
         ds_repo="$(echo $ds | cut -d' ' -f1)"
         should_trigger=true
