@@ -16,6 +16,11 @@
       },
       {
         "source": "payload",
+        "name": "pull_request",
+        "envname": "PULL_REQUEST"
+      },
+      {
+        "source": "payload",
         "name": "build_status",
         "envname": "BUILD_STATUS"
       },
