@@ -23,7 +23,7 @@ secs="$(($BUILD_FINISHED - $BUILD_STARTED))"
 datefmt=$(test $secs -ge 3600 && echo '+%Hh %Mm %Ss' || echo '+%Mm %Ss')
 date="$(date -u -d "@$secs" "$datefmt")"
 tag="$(test -n "$TAG" -a "$TAG" != "<nil>" && echo ":$TAG" || true)"
-branch="$(test -n "$PULL_REQUEST" -a "$PULL_REQUEST" != "<nil>" && echo "#$PULL_REQUEST" || echo "$BRANCH")"
+branch="$(test -n "$PULL_REQUEST" -a "$PULL_REQUEST" != "<nil>" && echo "PR #$PULL_REQUEST → $BRANCH" || echo "$BRANCH")"
 
 message="<b>${REPO/_/\\_}${tag} [$branch]</b> #$BUILD_NUMBER: <b>$(upper $BUILD_STATUS)</b> in ${date}
 <a href=\"$(esc ${BUILD_LINK})\">$(esc ${BUILD_LINK})</a>
